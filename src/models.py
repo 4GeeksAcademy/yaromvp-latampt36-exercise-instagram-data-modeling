@@ -7,26 +7,47 @@ from eralchemy2 import render_er
 
 Base = declarative_base()
 
-class Person(Base):
-    __tablename__ = 'person'
-    # Here we define columns for the table person
-    # Notice that each column is also a normal Python instance attribute.
+class User(Base):
+    __tablename__ = 'user'
     id = Column(Integer, primary_key=True)
+    user_name = Column(String(250), nullable=False)
     name = Column(String(250), nullable=False)
+    email = Column(String(250), nullable=False, unique=True)
+    phone = Column(String(250), nullable=False)
+    photo = Column(String(250), nullable=False)
 
-class Address(Base):
-    __tablename__ = 'address'
-    # Here we define columns for the table address.
-    # Notice that each column is also a normal Python instance attribute.
+    publication = relationship("Publication", back_populates="user")
+    comment = relationship("Comment", back_populates="user")
+
+class Publication(Base):
+    __tablename__ = 'publication'
     id = Column(Integer, primary_key=True)
-    street_name = Column(String(250))
-    street_number = Column(String(250))
-    post_code = Column(String(250), nullable=False)
-    person_id = Column(Integer, ForeignKey('person.id'))
-    person = relationship(Person)
+    publication_type_id = Column(Integer, ForeignKey('publication_type.id'))
+    title = Column(String(250), nullable=False)
+    media = Column(String(250), nullable=False)
+    description = Column(String(250), nullable=False)
+    user_id = Column(Integer, ForeignKey('user.id'))
 
-    def to_dict(self):
-        return {}
+    user = relationship("User", back_populates="publication")
+    publication_type = relationship("Publication_Type", back_populates="publication")
+    comment = relationship("Comment", back_populates="publication")
+
+class Publication_Type(Base):
+    __tablename__ = 'publication_type'
+    id = Column(Integer, primary_key=True)
+    description = Column(String(250), nullable=False)
+
+    publication = relationship("Publication", back_populates="publication_type")
+
+class Comment(Base):
+    __tablename__ = 'comment'
+    id = Column(Integer, primary_key=True)
+    comment_text = Column(String(250), nullable=False)
+    user_id = Column(Integer, ForeignKey('user.id'))
+    publication_id = Column(Integer, ForeignKey('publication.id'))
+
+    user = relationship("User", back_populates="comment")
+    publication = relationship("Publication", back_populates="comment")
 
 ## Draw from SQLAlchemy base
 try:
